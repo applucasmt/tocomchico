@@ -6,13 +6,13 @@
     <title>Criador de Molduras</title>
     <style>
         :root {
-            --primary: #006805;     /* Verde Escuro */
-            --secondary: #71BF50;   /* Verde Claro */
-            --accent: #FECD29;      /* Amarelo */
-            --bg-color: #F2F2F7;    /* Cinza padrão fundo iOS */
-            --card-bg: #FFFFFF;     /* Branco */
-            --text-main: #1C1C1E;   /* Texto Principal iOS */
-            --text-sub: #8E8E93;    /* Texto Secundário iOS */
+            --primary: #006805;     
+            --secondary: #71BF50;   
+            --accent: #FECD29;      
+            --bg-color: #F2F2F7;    
+            --card-bg: #FFFFFF;     
+            --text-main: #1C1C1E;   
+            --text-sub: #8E8E93;    
             --border-color: rgba(60, 60, 67, 0.1);
         }
 
@@ -293,7 +293,6 @@
 
         <p class="hint-text" id="adjustHint">👆 Arraste e faça pinça para ajustar a foto</p>
 
-        <!-- Modificado para mostrar apenas 4 molduras -->
         <div class="frame-selector" id="frameSelector">
             <div class="frame-option active" data-index="0"><div class="frame-option-inner">1</div></div>
             <div class="frame-option" data-index="1"><div class="frame-option-inner">2</div></div>
@@ -339,13 +338,11 @@
         const previewContainer = document.getElementById('previewContainer');
         const frameOptions = document.querySelectorAll('.frame-option');
 
-        // Estado do App
         let originalImage = null;
         let imageLoaded = false;
         let isCameraMode = false;
         let cameraStream = null;
 
-        // Estado do Pan e Zoom
         let zoomLevel = 1;
         let panX = 0;
         let panY = 0;
@@ -359,26 +356,18 @@
         let initialPanY = 0;
 
         // =============================================================
-        // CONFIGURAÇÃO DO GITHUB ATUALIZADA
+        // CONFIGURAÇÃO DOS ARQUIVOS LOCAIS (Hospedado na Vercel)
         // =============================================================
-        const GITHUB_USER = "lucas-rocha-ramos"; 
-        const REPO_NAME = "T-com-chico";
-        const BRANCH = "main"; 
-
-        // URLs usando %20 para os espaços
         const FRAMES_URLS = [
-            `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/mold%2001.png`,
-            `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/mold%2002.png`,
-            `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/mold%2003.png`,
-            `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/mold%2004.png`
+            "mold 01.png",
+            "mold 02.png",
+            "mold 03.png",
+            "mold 04.png"
         ];
         // =============================================================
 
         let currentFrameIndex = 0;
         let activeFrameImage = new Image();
-        
-        activeFrameImage.crossOrigin = "anonymous"; 
-        
         let isFrameLoaded = false;
 
         function drawPlaceholder() {
@@ -415,7 +404,7 @@
             };
             activeFrameImage.onerror = () => {
                 loadingIndicator.style.display = 'none';
-                alert("Erro ao carregar a moldura do GitHub. Verifique a imagem.");
+                alert("Erro ao carregar a moldura. Verifique se as imagens estão na mesma pasta do código na Vercel.");
             };
             activeFrameImage.src = FRAMES_URLS[currentFrameIndex];
         }
