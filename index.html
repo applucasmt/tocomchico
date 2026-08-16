@@ -293,15 +293,8 @@
 
         <p class="hint-text" id="adjustHint">👆 Arraste e faça pinça para ajustar a foto</p>
 
-        <!-- Menu com 5 opções -->
-        <div class="frame-selector" id="frameSelector">
-            <div class="frame-option active" data-index="0"><div class="frame-option-inner">1</div></div>
-            <div class="frame-option" data-index="1"><div class="frame-option-inner">2</div></div>
-            <div class="frame-option" data-index="2"><div class="frame-option-inner">3</div></div>
-            <div class="frame-option" data-index="3"><div class="frame-option-inner">4</div></div>
-            <div class="frame-option" data-index="4"><div class="frame-option-inner">5</div></div>
-            <div class="frame-option" data-index="6"><div class="frame-option-inner">6</div></div>
-        </div>
+        <!-- Menu dinâmico: as molduras serão criadas aqui pelo JavaScript -->
+        <div class="frame-selector" id="frameSelector"></div>
 
         <div class="controls-area">
             <div class="action-row">
@@ -339,7 +332,7 @@
         const placeholderMsg = document.getElementById('placeholderMsg');
         const adjustHint = document.getElementById('adjustHint');
         const previewContainer = document.getElementById('previewContainer');
-        const frameOptions = document.querySelectorAll('.frame-option');
+        const frameSelector = document.getElementById('frameSelector');
 
         let originalImage = null;
         let imageLoaded = false;
@@ -361,19 +354,56 @@
         // =============================================================
         // CONFIGURAÇÃO DOS ARQUIVOS LOCAIS (Hospedado na Vercel)
         // =============================================================
+        // Para adicionar novas molduras, basta inserir no FINAL desta lista.
+        // O sistema cuidará de ordená-las da mais nova para a mais antiga.
         const FRAMES_URLS = [
             "mold 01.png",
             "mold 02.png",
             "mold 03.png",
             "mold 04.png",
-            "mold 05.png"
-            "mold 06.png"
+            "mold 05.png",
+            "mold 06.png" // VÍRGULA ADICIONADA AQUI (CORREÇÃO)
         ];
         // =============================================================
 
-        let currentFrameIndex = 0;
+        // Inicia com a moldura mais recente (a última da lista)
+        let currentFrameIndex = FRAMES_URLS.length - 1; 
         let activeFrameImage = new Image();
         let isFrameLoaded = false;
+
+        // FUNÇÃO PARA GERAR OS BOTÕES DINAMICAMENTE (Mais recentes primeiro)
+        function initializeFrames() {
+            frameSelector.innerHTML = ''; // Limpa o container
+            
+            // Percorre a lista de trás para frente
+            for (let i = FRAMES_URLS.length - 1; i >= 0; i--) {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'frame-option';
+                
+                // Define a primeira a ser gerada como ativa
+                if (i === currentFrameIndex) {
+                    optionDiv.classList.add('active');
+                }
+                
+                optionDiv.setAttribute('data-index', i);
+                
+                const innerDiv = document.createElement('div');
+                innerDiv.className = 'frame-option-inner';
+                innerDiv.textContent = i + 1; // Exibe o número da moldura baseado na ordem
+                
+                optionDiv.appendChild(innerDiv);
+                
+                // Adiciona o evento de clique
+                optionDiv.addEventListener('click', function() {
+                    document.querySelectorAll('.frame-option').forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFrameIndex = parseInt(this.getAttribute('data-index'));
+                    loadSelectedFrame();
+                });
+                
+                frameSelector.appendChild(optionDiv);
+            }
+        }
 
         function drawPlaceholder() {
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -726,15 +756,6 @@
             renderCanvas();
         }, { passive: false });
 
-        frameOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                frameOptions.forEach(opt => opt.classList.remove('active'));
-                this.classList.add('active');
-                currentFrameIndex = parseInt(this.getAttribute('data-index'));
-                loadSelectedFrame();
-            });
-        });
-
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 if (isCameraMode) stopCamera();
@@ -764,10 +785,7 @@
             downloadBtn.disabled = true;
 
             try {
-                // 1. Gera a imagem de forma síncrona para não perder o contexto do clique no Android
                 const dataUrl = canvas.toDataURL('image/png', 1.0);
-                
-                // 2. Converte para arquivo nativamente para o Web Share
                 let arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1];
                 let bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
                 while(n--){
@@ -776,10 +794,8 @@
                 const fileName = `moldura_${new Date().getTime()}.png`;
                 const file = new File([u8arr], fileName, { type: mime });
 
-                // 3. Detecta se é Celular ou PC
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                // 4. Compartilhar (Celular) ou Baixar Direto (PC / Sem Suporte)
                 if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
@@ -803,7 +819,6 @@
                 resetButton();
             }
 
-            // Função de Download universal 
             function fallbackDownload(fileObj, name) {
                 try {
                     const url = window.URL.createObjectURL(fileObj);
@@ -840,11 +855,12 @@
         });
 
         // =============================================================
-        // INICIALIZAÇÃO AUTOMÁTICA DA CÂMERA
+        // INICIALIZAÇÃO AUTOMÁTICA
         // =============================================================
         window.onload = () => {
+            initializeFrames(); // Cria as opções de moldura dinamicamente
             loadSelectedFrame();
-            openCamera(); // Chama a função para abrir a câmera automaticamente
+            openCamera();
         };
     </script>
 </body>
