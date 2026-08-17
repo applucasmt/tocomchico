@@ -4,7 +4,7 @@ export default function handler(req, res) {
     
     // 2. Fixamos o caminho exato da imagem 
     // (Mude para capa.jpg se o seu arquivo não for .png)
-    const imageUrl = `${domain}/capa.png`; 
+    const imageUrl = `${domain}/capachico.png`; 
 
     const html = `
     <!DOCTYPE html>
